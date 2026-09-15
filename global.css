@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Modo Diurno: Papel Solar */
+  --color-background: 237 230 211; /* #EDE6D3 */
+  --color-surface: 244 239 226;    /* #F4EFE2 */
+  --color-surface-border: 221 214 193; /* #DDD6C1 */
+  --color-ink: 58 58 56;           /* #3A3A38 */
+  --color-ink-muted: 122 120 117;  /* #7A7875 */
+  --color-accent: 217 146 46;      /* #D9922E */
+  --color-accent-muted: 240 194 128;
+  --color-success: 58 107 76;      /* #3A6B4C */
+  --color-danger: 148 61 61;       /* #943D3D */
+}
+
+.dark, [data-theme="dark"] {
+  /* Modo Noturno: Noite Quente */
+  --color-background: 22 20 18;    /* #161412 */
+  --color-surface: 34 30 26;       /* #221E1A */
+  --color-surface-border: 51 45 38; /* #332D26 */
+  --color-ink: 237 230 211;        /* #EDE6D3 */
+  --color-ink-muted: 158 151 137;  /* #9E9789 */
+  --color-accent: 232 168 62;      /* #E8A83E */
+  --color-accent-muted: 125 87 28;
+  --color-success: 78 138 99;      /* #4E8A63 */
+  --color-danger: 184 80 80;       /* #B85050 */
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #ede6d3;
+  overflow: hidden;
+}

@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KYNIO SOMNUS — Circadian Light & Sleep</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <link rel="apple-touch-icon" href="assets/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #EDE6D3;
+      --surface: #F4EFE2;
+      --border: #DDD6C1;
+      --ink: #3A3A38;
+      --ink-muted: #7A7875;
+      --accent: #D9922E;
+      --accent-muted: #F0C280;
+      --success: #3A6B4C;
+      --danger: #943D3D;
+      --card-radius: 16px;
+    }
+
+    body.dark {
+      --bg: #161412;
+      --surface: #221E1A;
+      --border: #332D26;
+      --ink: #EDE6D3;
+      --ink-muted: #9E9789;
+      --accent: #E8A83E;
+      --accent-muted: #7D571C;
+      --success: #4E8A63;
+      --danger: #B85050;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Hanken Grotesk', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+
+    header {
+      padding: 18px 20px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: var(--ink);
+    }
+
+    .clock-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+    }
+
+    main {
+      flex: 1;
+      padding: 16px 20px 80px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--ink-muted);
+      font-weight: 700;
+    }
+
+    /* Tab Bar */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: 64px;
+      background-color: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--ink-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      padding: 8px 12px;
+      transition: color 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .tab-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+    }
+
+    /* Tab content */
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background-color: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-family: 'Hanken Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary:active {
+      opacity: 0.85;
+    }
+
+    .btn-secondary {
+      background-color: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-family: 'Hanken Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* Switch Tabs */
+    .switch-pills {
+      display: flex;
+      padding: 3px;
+      border-radius: 12px;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .switch-pill {
+      flex: 1;
+      padding: 10px 12px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--ink-muted);
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    .switch-pill.active {
+      background-color: var(--ink);
+      color: var(--bg);
+    }
+
+    /* Dot Matrix */
+    .matrix-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin: 12px 0;
+    }
+
+    .matrix-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .matrix-stepper {
+      background-color: var(--border);
+      color: var(--ink);
+      border: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .matrix-box {
+      display: flex;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background-color: rgba(221, 214, 193, 0.2);
+      margin: 6px 0;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(22, 20, 18, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    /* Two-zone caffeine bar */
+    .two-zone-bar {
+      height: 12px;
+      border-radius: 999px;
+      display: flex;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin: 8px 0;
+    }
+
+    .two-zone-safe {
+      width: 65%;
+      background-color: var(--success);
+    }
+
+    .two-zone-danger {
+      width: 35%;
+      background-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div>
+        <div class="brand-tag">Âncora Fotónica Circadiana</div>
+        <div class="brand-title">KYNIO SOMNUS</div>
+      </div>
+      <div class="clock-badge" id="live-time">12:00</div>
+    </header>
+
+    <main>
+      <!-- TAB 1: SOL (Index) -->
+      <div id="tab-sol" class="tab-pane active">
+        <!-- Cúpula Celeste (Solar Dome) -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent);"></span>
+              <span class="label" id="elevation-label">SOLAR ELEVATION: +48.2°</span>
+            </div>
+            <span class="label" style="color: var(--accent);" id="zenith-label">ZENITH: 13:24</span>
+          </div>
+
+          <!-- SVG Dome -->
+          <svg width="100%" height="150" viewBox="0 0 320 150" style="display: block; margin: 0 auto;">
+            <defs>
+              <linearGradient id="domeGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="var(--accent)" stop-opacity="0.2"/>
+                <stop offset="1" stop-color="var(--accent)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 25 120 A 135 95 0 0 1 295 120 Z" fill="url(#domeGrad)"/>
+            <path d="M 25 120 A 135 95 0 0 1 295 120" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4,4"/>
+            <line x1="10" y1="120" x2="310" y2="120" stroke="var(--border)" stroke-width="1.5"/>
+            <line x1="160" y1="25" x2="160" y2="33" stroke="var(--border)" stroke-width="1.5"/>
+
+            <!-- Sol com anel radiante -->
+            <circle id="sun-ring" cx="190" cy="50" r="16" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2,3" fill="none" opacity="0.7"/>
+            <circle id="sun-halo" cx="190" cy="50" r="11" fill="var(--accent)" opacity="0.25"/>
+            <circle id="sun-core" cx="190" cy="50" r="6.5" fill="var(--accent)" stroke="var(--bg)" stroke-width="2"/>
+          </svg>
+
+          <!-- Dot-Clock 7 dias (M T W T F S S) -->
+          <div style="display: flex; justify-content: center; align-items: center; gap: 12px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; width: fit-content; margin: 6px auto 12px;">
+            <span class="label" style="font-size: 9px; margin-right: 2px;">ÂNCORA:</span>
+            <div style="display: flex; gap: 10px;" id="weekly-streak-dots">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+
+          <!-- Rótulos Astronómicos -->
+          <div style="display: flex; justify-content: space-between;">
+            <div>
+              <div class="label" style="font-size: 9px;">Nascer</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;" id="sunrise-time">06:45</div>
+            </div>
+            <div style="text-align: center;">
+              <div class="label" style="font-size: 9px;">Zénite Solar</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;" id="noon-time">13:24</div>
+            </div>
+            <div style="text-align: right;">
+              <div class="label" style="font-size: 9px;">Pôr do Sol</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;" id="sunset-time">19:45</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cartão Banho de Luz Matinal -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span class="label" style="color: var(--accent);">Banho de Luz Matinal</span>
+            <!-- 4 Pontos Matriciais de Intensidade -->
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span class="label" style="font-size: 9px;">LUX:</span>
+              <span id="lux-dots" style="color: var(--accent); font-size: 13px; letter-spacing: 2px;">● ● ● ●</span>
+              <span class="label" style="font-size: 9px; margin-left: 4px;" id="lux-estimate">~50.000 lux</span>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+            <div style="font-size: 32px; font-weight: 900;" id="light-target-minutes">10 min</div>
+            <div class="label" id="sky-label">Céu Limpo (Sol Direto)</div>
+          </div>
+
+          <!-- Seletor de Condição -->
+          <div style="display: flex; gap: 6px; margin-bottom: 14px;">
+            <button class="switch-pill active" style="font-size: 9px;" onclick="setSky('direct_sun')">Sol Direto (10m)</button>
+            <button class="switch-pill" style="font-size: 9px;" onclick="setSky('cloudy')">Nublado (20m)</button>
+            <button class="switch-pill" style="font-size: 9px;" onclick="setSky('window')">Janela (60m)</button>
+          </div>
+
+          <!-- Timer Digital -->
+          <div style="text-align: center; padding: 10px 0;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 48px; font-weight: 900; letter-spacing: -1px;" id="timer-display">10:00</div>
+            <div style="width: 100%; height: 6px; background-color: var(--border); border-radius: 999px; margin-top: 10px; overflow: hidden;">
+              <div id="timer-progress-bar" style="width: 0%; height: 100%; background-color: var(--accent); transition: width 0.3s;"></div>
+            </div>
+            <div style="font-size: 11px; color: var(--ink-muted); margin-top: 8px;" id="timer-rationale">
+              Céu limpo com elevação solar ideal. 10 minutos bastam para disparar o pico matinal de cortisol.
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 12px;">
+            <button class="btn-primary" id="start-timer-btn" onclick="toggleLightTimer()">[ INICIAR BANHO DE LUZ ]</button>
+            <button class="btn-secondary" style="width: auto; padding: 0 16px;" onclick="resetLightTimer()">↺</button>
+          </div>
+        </div>
+
+        <!-- Medidor de Cafeína (Duas Zonas) -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="label" style="color: var(--accent);">Depuração Metabólica de Cafeína</span>
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 2px 8px; border-radius: 999px; background-color: rgba(58, 107, 76, 0.15); color: var(--success); font-weight: 700;">
+              ZONA SEGURA
+            </span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+            <div>
+              <div class="label" style="font-size: 10px;">CORTE RECOMENDADO:</div>
+              <div style="font-size: 28px; font-weight: 900; color: var(--ink);">14:15</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--success);" id="caffeine-active-txt">~28 mg ativos às 23:00</div>
+              <div class="label" style="font-size: 9px;" id="caffeine-consumed-txt">160 mg consumidos hoje</div>
+            </div>
+          </div>
+
+          <!-- Barra de Duas Zonas -->
+          <div class="two-zone-bar">
+            <div class="two-zone-safe"></div>
+            <div class="two-zone-danger"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span class="label" style="font-size: 8px; color: var(--success);">◄ Zona Segura (Manhã)</span>
+            <span class="label" style="font-size: 8px; color: var(--accent);">Zona Ativa no Sono (Noite) ►</span>
+          </div>
+
+          <button class="btn-secondary" style="margin-top: 14px;" onclick="logCoffee()">+ Registar Café Expresso (80mg)</button>
+        </div>
+      </div>
+
+      <!-- TAB 2: SONO (Sleep) -->
+      <div id="tab-sono" class="tab-pane">
+        <!-- Switch de Intenção -->
+        <div class="switch-pills">
+          <button class="switch-pill active" id="btn-intent-wake" onclick="setIntent('wake')">[ QUERO ACORDAR ÀS... ]</button>
+          <button class="switch-pill" id="btn-intent-now" onclick="setIntent('now')">[ VOU DORMIR AGORA ]</button>
+        </div>
+
+        <!-- Relógio Matricial Dot-Clock -->
+        <div class="card" style="text-align: center;" id="matrix-clock-card">
+          <div class="label">HORÁRIO ALVO DE DESPERTAR (DOT-CLOCK)</div>
+
+          <div class="matrix-display">
+            <div class="matrix-col">
+              <button class="matrix-stepper" onclick="adjustHour(1)">▲ +1H</button>
+              <div class="matrix-box" id="matrix-hours">
+                <!-- SVG Digits via JS -->
+              </div>
+              <button class="matrix-stepper" onclick="adjustHour(-1)">▼ -1H</button>
+            </div>
+
+            <div style="padding-top: 10px;">
+              <svg width="12" height="42">
+                <circle cx="6" cy="14" r="2" fill="var(--accent)"/>
+                <circle cx="6" cy="28" r="2" fill="var(--accent)"/>
+              </svg>
+            </div>
+
+            <div class="matrix-col">
+              <button class="matrix-stepper" onclick="adjustMinute(15)">▲ +15M</button>
+              <div class="matrix-box" id="matrix-mins">
+                <!-- SVG Digits via JS -->
+              </div>
+              <button class="matrix-stepper" onclick="adjustMinute(-15)">▼ -15M</button>
+            </div>
+          </div>
+          <div class="label" style="font-size: 9px;">(Inclui 14 min de latência média de adormecimento)</div>
+        </div>
+
+        <!-- 3 Cartões de Ciclos -->
+        <div class="label" style="margin-bottom: 8px;">Ciclos Ultradianos Disponíveis</div>
+
+        <div class="card" style="cursor: pointer;" onclick="selectCycles(4)" id="cycle-card-4">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="background-color: var(--border); padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">CURTO</span>
+              <strong style="font-size: 15px;">4 Ciclos (6h00)</strong>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 900;" id="cycle-time-4">00:46</div>
+          </div>
+          <div style="font-size: 12px; color: var(--ink-muted);">Para emergências e dias de acordar antecipado com despertar leve.</div>
+        </div>
+
+        <div class="card" style="border: 2px solid var(--accent); cursor: pointer;" onclick="selectCycles(5)" id="cycle-card-5">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="background-color: rgba(217, 146, 46, 0.2); color: var(--accent); padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">RECOMENDADO</span>
+              <strong style="font-size: 15px;">5 Ciclos (7h30)</strong>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 900; color: var(--accent);" id="cycle-time-5">23:16</div>
+          </div>
+          <div style="font-size: 12px; color: var(--ink-muted);">Padrão de ouro circadiano. Completa o ciclo REM matinal para clareza mental.</div>
+        </div>
+
+        <div class="card" style="cursor: pointer;" onclick="selectCycles(6)" id="cycle-card-6">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="background-color: rgba(58, 107, 76, 0.2); color: var(--success); padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">RECUPERAÇÃO</span>
+              <strong style="font-size: 15px;">6 Ciclos (9h00)</strong>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 900;" id="cycle-time-6">21:46</div>
+          </div>
+          <div style="font-size: 12px; color: var(--ink-muted);">Recuperação de débito de sono acumulado ou pós-treino extenuante.</div>
+        </div>
+
+        <!-- Aviso DLMO Crepúsculo -->
+        <div class="card" style="background-color: var(--surface);">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <span>🟡</span>
+            <span class="label" style="color: var(--accent);">Aviso de Crepúsculo (Modo DLMO)</span>
+          </div>
+          <div style="font-size: 12px; line-height: 1.5;" id="dlmo-notice-text">
+            A tua secreção de melatonina inicia-se às <strong>21:16</strong>. Reduz luzes de teto e ecrãs azuis a partir desta hora.
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: RITMO (Consistency) -->
+      <div id="tab-ritmo" class="tab-pane">
+        <!-- Horizonte de Consistência Semanal (7 Barras Verticais) -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="label" style="color: var(--accent);">Horizonte de Consistência Semanal</span>
+            <span class="label" style="font-size: 9px;">Desvio &lt; 30m: Linha Contínua</span>
+          </div>
+
+          <svg width="100%" height="120" viewBox="0 0 320 120" style="display: block; margin: 10px auto;">
+            <!-- Grelha -->
+            <line x1="10" y1="35" x2="310" y2="35" stroke="var(--border)" stroke-dasharray="3,3"/>
+            <line x1="10" y1="75" x2="310" y2="75" stroke="var(--border)" stroke-dasharray="3,3"/>
+
+            <!-- 7 Barras Verticais -->
+            <line x1="30" y1="20" x2="30" y2="90" stroke="var(--border)" stroke-width="2"/>
+            <line x1="73" y1="20" x2="73" y2="90" stroke="var(--border)" stroke-width="2"/>
+            <line x1="116" y1="20" x2="116" y2="90" stroke="var(--border)" stroke-width="2"/>
+            <line x1="160" y1="20" x2="160" y2="90" stroke="var(--border)" stroke-width="2"/>
+            <line x1="203" y1="20" x2="203" y2="90" stroke="var(--border)" stroke-width="2"/>
+            <line x1="246" y1="20" x2="246" y2="90" stroke="var(--border)" stroke-width="2"/>
+            <line x1="290" y1="20" x2="290" y2="90" stroke="var(--border)" stroke-width="2"/>
+
+            <!-- Linha contínua âmbar conectando os horários -->
+            <path d="M 30 55 L 73 53 L 116 56 L 160 54 L 203 48 L 246 45 L 290 55" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+
+            <!-- Pontos nos 7 dias -->
+            <circle cx="30" cy="55" r="4.5" fill="var(--accent)"/>
+            <circle cx="73" cy="53" r="4.5" fill="var(--accent)"/>
+            <circle cx="116" cy="56" r="4.5" fill="var(--accent)"/>
+            <circle cx="160" cy="54" r="4.5" fill="var(--accent)"/>
+            <circle cx="203" cy="48" r="4.5" fill="var(--accent)"/>
+            <circle cx="246" cy="45" r="4.5" fill="var(--accent)"/>
+            <circle cx="290" cy="55" r="4.5" fill="var(--accent)"/>
+          </svg>
+
+          <div style="display: flex; justify-content: space-around; font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; color: var(--ink-muted);">
+            <span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span><span>DOM</span>
+          </div>
+        </div>
+
+        <!-- Métricas de Estabilidade -->
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+          <div class="card" style="flex: 1; text-align: center; margin-bottom: 0;">
+            <div class="label" style="font-size: 9px;">Estabilidade Circadiana</div>
+            <div style="font-size: 36px; font-weight: 900; color: var(--accent); margin: 4px 0;">94%</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--success); font-weight: 700;">Excelente</div>
+          </div>
+          <div class="card" style="flex: 1; text-align: center; margin-bottom: 0;">
+            <div class="label" style="font-size: 9px;">Social Jetlag</div>
+            <div style="font-size: 36px; font-weight: 900; color: var(--ink); margin: 4px 0;">18 min</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--success); font-weight: 700;">✓ Ritmo Protegido</div>
+          </div>
+        </div>
+
+        <!-- Check-in Matinal de 1 Toque (5 Ícones Solares Graduais) -->
+        <div class="card">
+          <div class="label" style="color: var(--accent); margin-bottom: 4px;">Como acordaste hoje?</div>
+          <div style="font-size: 12px; color: var(--ink-muted); margin-bottom: 12px;" id="checkin-status">
+            1 toque de prontidão biológica (do sol no horizonte ao zénite pleno):
+          </div>
+
+          <div style="display: flex; justify-content: space-between; gap: 6px;">
+            <div class="switch-pill" style="display: flex; flex-direction: column; align-items: center; padding: 10px 4px;" onclick="rateSun(1)">
+              <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                <line x1="2" y1="18" x2="22" y2="18" stroke-width="2"/>
+                <path d="M 7 18 A 5 5 0 0 1 17 18" stroke-width="2"/>
+              </svg>
+              <span style="font-size: 9px; margin-top: 4px;">Tímido</span>
+            </div>
+
+            <div class="switch-pill" style="display: flex; flex-direction: column; align-items: center; padding: 10px 4px;" onclick="rateSun(2)">
+              <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                <line x1="2" y1="17" x2="22" y2="17" stroke-width="2"/>
+                <path d="M 6 17 A 6 6 0 0 1 18 17" fill="currentColor" fill-opacity="0.3" stroke-width="1.5"/>
+                <line x1="12" y1="7" x2="12" y2="4" stroke-width="1.5"/>
+              </svg>
+              <span style="font-size: 9px; margin-top: 4px;">Lento</span>
+            </div>
+
+            <div class="switch-pill" style="display: flex; flex-direction: column; align-items: center; padding: 10px 4px;" onclick="rateSun(3)">
+              <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                <circle cx="12" cy="12" r="6" fill="currentColor" fill-opacity="0.3" stroke-width="2"/>
+              </svg>
+              <span style="font-size: 9px; margin-top: 4px;">Neutro</span>
+            </div>
+
+            <div class="switch-pill" style="display: flex; flex-direction: column; align-items: center; padding: 10px 4px;" onclick="rateSun(4)">
+              <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                <circle cx="12" cy="12" r="5" fill="currentColor" stroke-width="2"/>
+                <line x1="12" y1="2" x2="12" y2="4" stroke-width="2"/>
+                <line x1="12" y1="20" x2="12" y2="22" stroke-width="2"/>
+                <line x1="2" y1="12" x2="4" y2="12" stroke-width="2"/>
+                <line x1="20" y1="12" x2="22" y2="12" stroke-width="2"/>
+              </svg>
+              <span style="font-size: 9px; margin-top: 4px;">Desperto</span>
+            </div>
+
+            <div class="switch-pill active" style="display: flex; flex-direction: column; align-items: center; padding: 10px 4px;" onclick="rateSun(5)">
+              <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                <circle cx="12" cy="12" r="5.5" fill="currentColor" stroke-width="1.5"/>
+                <line x1="12" y1="1" x2="12" y2="3.5" stroke-width="2"/>
+                <line x1="12" y1="20.5" x2="12" y2="23" stroke-width="2"/>
+                <line x1="1" y1="12" x2="3.5" y2="12" stroke-width="2"/>
+                <line x1="20.5" y1="12" x2="23" y2="12" stroke-width="2"/>
+                <line x1="4.5" y1="4.5" x2="6.2" y2="6.2" stroke-width="1.8"/>
+                <line x1="17.8" y1="17.8" x2="19.5" y2="19.5" stroke-width="1.8"/>
+              </svg>
+              <span style="font-size: 9px; margin-top: 4px;">Zénite</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: DEFINIÇÕES (Settings) -->
+      <div id="tab-definicoes" class="tab-pane">
+        <!-- Parâmetros Astronómicos Locais -->
+        <div class="card">
+          <div class="label" style="color: var(--accent); margin-bottom: 6px;">Coordenadas Astronómicas Locais</div>
+          <div style="font-size: 12px; color: var(--ink-muted); margin-bottom: 8px;">
+            As coordenadas são processadas exclusivamente na memória física deste telemóvel pelas equações NOAA e nunca são transmitidas via rede.
+          </div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; margin-bottom: 12px;">
+            Lat: 38.7223° N | Lon: -9.1393° W (Lisboa)
+          </div>
+          <button class="btn-secondary" onclick="updateGeo()">[ Atualizar Coordenadas Offline ]</button>
+        </div>
+
+        <!-- Soberania de Dados (RGPD) -->
+        <div class="card">
+          <div class="label" style="color: var(--success); margin-bottom: 6px;">Soberania de Dados &amp; RGPD</div>
+          <div style="font-size: 12px; color: var(--ink-muted); margin-bottom: 14px;">
+            Conformidade total com o Artigo 17 (Direito ao Esquecimento) e Artigo 20 (Portabilidade de Dados).
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn-secondary" onclick="downloadGdprJson()">Exportar Histórico Completo (JSON)</button>
+            <button class="btn-secondary" onclick="openDisclaimerModal()">Rever Termo de Responsabilidade de Saúde</button>
+            <button class="btn-secondary" style="color: var(--danger); border-color: rgba(148, 61, 61, 0.4);" onclick="wipeData()">Eliminar Todos os Dados Locais</button>
+          </div>
+        </div>
+
+        <!-- Alternador de Tema -->
+        <div class="card">
+          <div class="label" style="margin-bottom: 8px;">Modo de Ecrã</div>
+          <div style="display: flex; gap: 6px;">
+            <button class="switch-pill active" id="btn-theme-auto" onclick="setAppTheme('auto')">Solar Auto</button>
+            <button class="switch-pill" id="btn-theme-light" onclick="setAppTheme('light')">Dia (Papel)</button>
+            <button class="switch-pill" id="btn-theme-dark" onclick="setAppTheme('dark')">Noite (Âmbar)</button>
+          </div>
+        </div>
+
+        <!-- Subscrição Pro Modal Trigger -->
+        <div class="card" style="border-color: var(--accent);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="font-size: 16px;">KYNIO SOMNUS PRO</strong>
+              <div class="label" style="color: var(--accent);">Subscrição de Prestígio</div>
+            </div>
+            <button class="btn-primary" style="width: auto; padding: 10px 16px;" onclick="openPaywallModal()">Ver Planos</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Barra de Navegação Inferior -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" id="tab-nav-sol" onclick="switchTab('sol')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <span>Sol</span>
+      </button>
+
+      <button class="tab-btn" id="tab-nav-sono" onclick="switchTab('sono')">
+        <svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span>Sono</span>
+      </button>
+
+      <button class="tab-btn" id="tab-nav-ritmo" onclick="switchTab('ritmo')">
+        <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span>Ritmo</span>
+      </button>
+
+      <button class="tab-btn" id="tab-nav-definicoes" onclick="switchTab('definicoes')">
+        <svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Definições</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Modal Disclaimer Gate (Obrigatório EU MDR / FDA) -->
+  <div class="modal-overlay" id="disclaimer-modal">
+    <div class="modal-card">
+      <span class="label" style="color: var(--accent);">RGPD &amp; EU MDR / FDA Wellness</span>
+      <h2 style="font-size: 24px; font-weight: 900; margin: 6px 0 12px;">KYNIO SOMNUS</h2>
+      <p style="font-size: 13px; line-height: 1.6; margin-bottom: 14px;">
+        O KYNIO Somnus é uma ferramenta de apoio a hábitos de estilo de vida e ritmo circadiano. Não constitui aconselhamento médico, diagnóstico clínico nem tratamento de perturbações do sono.
+      </p>
+      <div style="background-color: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 18px;">
+        <strong style="font-size: 12px; color: var(--success); display: block; margin-bottom: 4px;">Privacidade Absoluta (Local-First):</strong>
+        <p style="font-size: 11px; line-height: 1.5; color: var(--ink-muted);">
+          100% dos seus registos de sono e cálculo solar NOAA permanecem no seu computador. Zero telemetria de identificação pessoal.
+        </p>
+      </div>
+      <button class="btn-primary" onclick="acceptDisclaimer()">Compreendo e Aceito</button>
+    </div>
+  </div>
+
+  <!-- Modal Paywall Pro -->
+  <div class="modal-overlay" id="paywall-modal">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span class="label" style="color: var(--accent);">Subscrição de Prestígio</span>
+        <button onclick="closePaywallModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink);">✕</button>
+      </div>
+      <h2 style="font-size: 24px; font-weight: 900; margin-bottom: 6px;">KYNIO SOMNUS PRO</h2>
+      <p style="font-size: 13px; color: var(--ink-muted); margin-bottom: 16px;">
+        Desbloqueie relatórios clínicos em PDF, mapeamento aprofundado de Social Jetlag e sons de crepúsculo.
+      </p>
+
+      <div class="card" style="border-color: var(--accent); margin-bottom: 12px; cursor: pointer;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>Plano Anual (7 Dias Grátis)</strong>
+            <div style="font-size: 11px; color: var(--ink-muted);">29,99€ / ano (2,49€ / mês)</div>
+          </div>
+          <span style="font-size: 18px; color: var(--accent);">✓</span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 16px; cursor: pointer;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>Acesso Vitalício</strong>
+            <div style="font-size: 11px; color: var(--ink-muted);">59,99€ pagamento único</div>
+          </div>
+          <span style="font-size: 18px; color: var(--border);">○</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="alert('Funcionalidades Pro Ativadas com Sucesso!'); closePaywallModal();">Ativar 7 Dias Grátis</button>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let wakeHour = 7;
+    let wakeMinute = 0;
+    let targetCycles = 5;
+    let timerDuration = 10 * 60;
+    let timerElapsed = 0;
+    let timerInterval = null;
+    let currentSky = 'direct_sun';
+    let currentIntent = 'wake';
+
+    // FONT 5X7 Digits
+    const FONT_5X7 = {
+      '0': [0b01110, 0b10001, 0b10011, 0b10101, 0b11001, 0b10001, 0b01110],
+      '1': [0b00100, 0b01100, 0b00100, 0b00100, 0b00100, 0b00100, 0b01110],
+      '2': [0b01110, 0b10001, 0b00001, 0b00110, 0b01000, 0b10000, 0b11111],
+      '3': [0b01110, 0b10001, 0b00001, 0b00110, 0b00001, 0b10001, 0b01110],
+      '4': [0b00010, 0b00110, 0b01010, 0b10010, 0b11111, 0b00010, 0b00010],
+      '5': [0b11111, 0b10000, 0b11110, 0b00001, 0b00001, 0b10001, 0b01110],
+      '6': [0b01110, 0b10000, 0b11110, 0b10001, 0b10001, 0b10001, 0b01110],
+      '7': [0b11111, 0b00001, 0b00010, 0b00100, 0b01000, 0b01000, 0b01000],
+      '8': [0b01110, 0b10001, 0b10001, 0b01110, 0b10001, 0b10001, 0b01110],
+      '9': [0b01110, 0b10001, 0b10001, 0b01111, 0b00001, 0b00010, 0b01100],
+    };
+
+    function renderDotDigitSvg(char) {
+      const pattern = FONT_5X7[char] || FONT_5X7['0'];
+      const spacing = 5;
+      const r = 1.8;
+      let circles = '';
+      for (let row = 0; row < 7; row++) {
+        const bits = pattern[row];
+        for (let col = 0; col < 5; col++) {
+          const bit = (bits >> (4 - col)) & 1;
+          const cx = col * spacing + r + 1;
+          const cy = row * spacing + r + 1;
+          const fill = bit === 1 ? 'var(--accent)' : 'var(--border)';
+          const op = bit === 1 ? '1' : '0.25';
+          circles += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" opacity="${op}"/>`;
+        }
+      }
+      return `<svg width="28" height="38">${circles}</svg>`;
+    }
+
+    function updateMatrixClock() {
+      const hStr = String(wakeHour).padStart(2, '0');
+      const mStr = String(wakeMinute).padStart(2, '0');
+      document.getElementById('matrix-hours').innerHTML = renderDotDigitSvg(hStr[0]) + renderDotDigitSvg(hStr[1]);
+      document.getElementById('matrix-mins').innerHTML = renderDotDigitSvg(mStr[0]) + renderDotDigitSvg(mStr[1]);
+      recomputeSleepCycles();
+    }
+
+    function adjustHour(delta) {
+      wakeHour = (wakeHour + delta + 24) % 24;
+      updateMatrixClock();
+    }
+
+    function adjustMinute(delta) {
+      wakeMinute = (wakeMinute + delta + 60) % 60;
+      updateMatrixClock();
+    }
+
+    function recomputeSleepCycles() {
+      const now = new Date();
+      let target;
+
+      if (currentIntent === 'wake') {
+        target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), wakeHour, wakeMinute, 0);
+        if (target <= now) target.setDate(target.getDate() + 1);
+
+        [4, 5, 6].forEach(c => {
+          const sleepMin = c * 90;
+          const bedDate = new Date(target.getTime() - (sleepMin + 14) * 60000);
+          const formatted = `${String(bedDate.getHours()).padStart(2, '0')}:${String(bedDate.getMinutes()).padStart(2, '0')}`;
+          document.getElementById(`cycle-time-${c}`).innerText = formatted;
+        });
+
+        const dlmoDate = new Date(target.getTime() - (5 * 90 + 14 + 120) * 60000);
+        const dlmoStr = `${String(dlmoDate.getHours()).padStart(2, '0')}:${String(dlmoDate.getMinutes()).padStart(2, '0')}`;
+        document.getElementById('dlmo-notice-text').innerHTML = `A tua secreção de melatonina inicia-se às <strong>${dlmoStr}</strong>. Reduz luzes de teto e ecrãs azuis a partir desta hora.`;
+      } else {
+        [4, 5, 6].forEach(c => {
+          const sleepMin = c * 90;
+          const wakeDate = new Date(now.getTime() + (sleepMin + 14) * 60000);
+          const formatted = `${String(wakeDate.getHours()).padStart(2, '0')}:${String(wakeDate.getMinutes()).padStart(2, '0')}`;
+          document.getElementById(`cycle-time-${c}`).innerText = formatted;
+        });
+      }
+    }
+
+    function selectCycles(c) {
+      targetCycles = c;
+      [4, 5, 6].forEach(num => {
+        const card = document.getElementById(`cycle-card-${num}`);
+        if (num === c) {
+          card.style.borderColor = 'var(--accent)';
+          card.style.boxShadow = '0 2px 8px rgba(217, 146, 46, 0.2)';
+        } else {
+          card.style.borderColor = 'var(--border)';
+          card.style.boxShadow = 'none';
+        }
+      });
+    }
+
+    function setIntent(intent) {
+      currentIntent = intent;
+      if (intent === 'wake') {
+        document.getElementById('btn-intent-wake').classList.add('active');
+        document.getElementById('btn-intent-now').classList.remove('active');
+        document.getElementById('matrix-clock-card').style.display = 'block';
+      } else {
+        document.getElementById('btn-intent-wake').classList.remove('active');
+        document.getElementById('btn-intent-now').classList.add('active');
+        document.getElementById('matrix-clock-card').style.display = 'none';
+      }
+      recomputeSleepCycles();
+    }
+
+    // Light Timer
+    function setSky(sky) {
+      currentSky = sky;
+      const pills = document.querySelectorAll('#tab-sol .switch-pills .switch-pill');
+      if (sky === 'direct_sun') {
+        timerDuration = 10 * 60;
+        document.getElementById('light-target-minutes').innerText = '10 min';
+        document.getElementById('sky-label').innerText = 'Céu Limpo (Sol Direto)';
+        document.getElementById('lux-dots').innerText = '● ● ● ●';
+        document.getElementById('lux-estimate').innerText = '~50.000 lux';
+        document.getElementById('timer-rationale').innerText = 'Céu limpo com elevação solar ideal. 10 minutos bastam para disparar o pico matinal de cortisol.';
+      } else if (sky === 'cloudy') {
+        timerDuration = 20 * 60;
+        document.getElementById('light-target-minutes').innerText = '20 min';
+        document.getElementById('sky-label').innerText = 'Céu Nublado (Difuso)';
+        document.getElementById('lux-dots').innerText = '● ● ● ○';
+        document.getElementById('lux-estimate').innerText = '~12.000 lux';
+        document.getElementById('timer-rationale').innerText = 'Mesmo com nuvens, a luz difusa exterior tem >10.000 lux, suficiente para sincronizar o ritmo.';
+      } else {
+        timerDuration = 60 * 60;
+        document.getElementById('light-target-minutes').innerText = '60 min';
+        document.getElementById('sky-label').innerText = 'Exposição À Janela';
+        document.getElementById('lux-dots').innerText = '● ○ ○ ○';
+        document.getElementById('lux-estimate').innerText = '~1.000 lux';
+        document.getElementById('timer-rationale').innerText = 'O vidro filtra até 80-90% dos fotões azuis. Recomenda-se sair para o exterior.';
+      }
+      resetLightTimer();
+    }
+
+    function toggleLightTimer() {
+      const btn = document.getElementById('start-timer-btn');
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.innerText = '[ CONTINUAR BANHO DE LUZ ]';
+        btn.style.backgroundColor = 'var(--accent)';
+      } else {
+        btn.innerText = '[ PAUSAR SESSÃO ]';
+        btn.style.backgroundColor = 'var(--ink)';
+        timerInterval = setInterval(() => {
+          timerElapsed++;
+          updateTimerDisplay();
+          if (timerElapsed >= timerDuration) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            btn.innerText = '✓ SESSÃO CONCLUÍDA';
+            btn.style.backgroundColor = 'var(--success)';
+            alert('🎉 Banho de Luz concluído! A sua âncora de cortisol foi ativada com sucesso.');
+          }
+        }, 1000);
+      }
+    }
+
+    function resetLightTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      timerElapsed = 0;
+      updateTimerDisplay();
+      const btn = document.getElementById('start-timer-btn');
+      btn.innerText = '[ INICIAR BANHO DE LUZ ]';
+      btn.style.backgroundColor = 'var(--accent)';
+    }
+
+    function updateTimerDisplay() {
+      const left = Math.max(0, timerDuration - timerElapsed);
+      const m = Math.floor(left / 60);
+      const s = left % 60;
+      document.getElementById('timer-display').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      const pct = (timerElapsed / timerDuration) * 100;
+      document.getElementById('timer-progress-bar').style.width = `${pct}%`;
+    }
+
+    // Caffeine
+    let caffeineConsumed = 160;
+    let caffeineActiveBedtime = 28;
+    function logCoffee() {
+      caffeineConsumed += 80;
+      caffeineActiveBedtime += 14;
+      document.getElementById('caffeine-consumed-txt').innerText = `${caffeineConsumed} mg consumidos hoje`;
+      document.getElementById('caffeine-active-txt').innerText = `~${caffeineActiveBedtime} mg ativos às 23:00`;
+      alert('✓ Café expresso (80mg) registado! A estimativa de depuração às 23:00 foi recalculada.');
+    }
+
+    // Check-in
+    function rateSun(score) {
+      const labels = ['Tímido', 'Lento', 'Neutro', 'Desperto', 'Zénite'];
+      document.getElementById('checkin-status').innerHTML = `✓ Feedback registado: <strong>Sol ${labels[score-1]}</strong> (Pontuação de Prontidão Gravada).`;
+    }
+
+    // Navigation
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      document.getElementById(`tab-nav-${tabId}`).classList.add('active');
+    }
+
+    // Modals
+    function acceptDisclaimer() {
+      localStorage.setItem('kynio_consent', 'true');
+      document.getElementById('disclaimer-modal').classList.remove('active');
+    }
+
+    function openDisclaimerModal() {
+      document.getElementById('disclaimer-modal').classList.add('active');
+    }
+
+    function openPaywallModal() {
+      document.getElementById('paywall-modal').classList.add('active');
+    }
+
+    function closePaywallModal() {
+      document.getElementById('paywall-modal').classList.remove('active');
+    }
+
+    // GDPR
+    function downloadGdprJson() {
+      const data = {
+        exportedAt: new Date().toISOString(),
+        compliance: "GDPR / Local-First",
+        userProfile: { latitude: 38.7223, longitude: -9.1393, caffeineHalfLife: 5.5 },
+        caffeineEntries: [{ amountMg: caffeineConsumed, time: new Date().toISOString() }],
+        sleepHistory: [
+          { date: "2026-09-15", wakeHour: 7, wakeMin: 0, cycles: 5, stabilityScore: 94 }
+        ]
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "kynio-somnus-export-rgpd.json";
+      a.click();
+    }
+
+    function wipeData() {
+      if (confirm("Tem a certeza de que deseja apagar permanentemente todos os registos locais (Artigo 17 RGPD)?")) {
+        localStorage.clear();
+        alert("Todos os dados foram eliminados com sucesso.");
+        location.reload();
+      }
+    }
+
+    function updateGeo() {
+      alert("Coordenadas atualizadas offline: 38.7223° N, -9.1393° W (Equações NOAA recalibradas).");
+    }
+
+    function setAppTheme(t) {
+      if (t === 'dark') {
+        document.body.classList.add('dark');
+      } else if (t === 'light') {
+        document.body.classList.remove('dark');
+      } else {
+        const h = new Date().getHours();
+        if (h >= 20 || h < 7) document.body.classList.add('dark');
+        else document.body.classList.remove('dark');
+      }
+    }
+
+    // Init
+    window.onload = () => {
+      const hasConsent = localStorage.getItem('kynio_consent');
+      if (!hasConsent) {
+        document.getElementById('disclaimer-modal').classList.add('active');
+      }
+
+      // Live Time
+      const updateClock = () => {
+        const now = new Date();
+        const str = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        document.getElementById('live-time').innerText = str;
+      };
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // Weekly Streak
+      const streak = [true, true, true, true, false, false, false];
+      const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      let streakHtml = '';
+      days.forEach((d, i) => {
+        const done = streak[i];
+        const color = done ? 'var(--accent)' : 'var(--border)';
+        streakHtml += `<div style="text-align: center;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background-color: ${color}; margin: 0 auto 2px;"></div>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; color: ${done ? 'var(--accent)' : 'var(--ink-muted)'}">${d}</span>
+        </div>`;
+      });
+      document.getElementById('weekly-streak-dots').innerHTML = streakHtml;
+
+      updateMatrixClock();
+      updateTimerDisplay();
+    };
+  </script>
+</body>
+</html>

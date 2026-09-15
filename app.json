@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "KYNIO Somnus",
+    "slug": "kynio-somnus",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "kyniosomnus",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#161412"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.kynio.somnus"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#161412"
+      },
+      "package": "com.kynio.somnus",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "@expo-google-fonts/hanken-grotesk",
+            "@expo-google-fonts/jetbrains-mono"
+          ]
+        }
+      ]
+    ]
+  }
+}
