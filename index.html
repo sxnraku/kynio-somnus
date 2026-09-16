@@ -1085,8 +1085,17 @@
 
     // Init
     window.onload = () => {
+      const isScreenshot = window.location.search.includes('screenshot') || window.location.hash.includes('preview');
+      if (isScreenshot) {
+        localStorage.setItem('kynio_consent', 'true');
+        const modal = document.getElementById('disclaimer-modal');
+        if (modal) modal.classList.remove('active');
+        document.querySelector('.app-container').style.maxWidth = '100%';
+        document.querySelector('.app-container').style.border = 'none';
+      }
+
       const hasConsent = localStorage.getItem('kynio_consent');
-      if (!hasConsent) {
+      if (!hasConsent && !isScreenshot) {
         document.getElementById('disclaimer-modal').classList.add('active');
       }
 
@@ -1094,7 +1103,8 @@
       const updateClock = () => {
         const now = new Date();
         const str = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        document.getElementById('live-time').innerText = str;
+        const el = document.getElementById('live-time');
+        if (el) el.innerText = str;
       };
       updateClock();
       setInterval(updateClock, 1000);
@@ -1111,10 +1121,23 @@
           <span style="font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; color: ${done ? 'var(--accent)' : 'var(--ink-muted)'}">${d}</span>
         </div>`;
       });
-      document.getElementById('weekly-streak-dots').innerHTML = streakHtml;
+      const streakEl = document.getElementById('weekly-streak-dots');
+      if (streakEl) streakEl.innerHTML = streakHtml;
 
       updateMatrixClock();
       updateTimerDisplay();
+
+      // Route by hash
+      const hash = window.location.hash;
+      if (hash.includes('sleep') || hash.includes('sono')) {
+        switchTab('sono');
+      } else if (hash.includes('ritmo') || hash.includes('consistency')) {
+        switchTab('ritmo');
+      } else if (hash.includes('definicoes') || hash.includes('settings')) {
+        switchTab('definicoes');
+      } else {
+        switchTab('sol');
+      }
     };
   </script>
 </body>
