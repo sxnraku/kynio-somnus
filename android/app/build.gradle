@@ -99,15 +99,10 @@ android {
     }
     signingConfigs {
         release {
-            def keystorePropsFile = rootProject.file('../android/keystore.properties')
-            if (keystorePropsFile.exists()) {
-                def keystoreProps = new Properties()
-                keystoreProps.load(new FileInputStream(keystorePropsFile))
-                storeFile file(keystoreProps['STORE_FILE'])
-                storePassword keystoreProps['STORE_PASSWORD']
-                keyAlias keystoreProps['KEY_ALIAS']
-                keyPassword keystoreProps['KEY_PASSWORD']
-            }
+            storeFile file('kynio-release.keystore')
+            storePassword 'kynio2026release'
+            keyAlias 'kynio-key'
+            keyPassword 'kynio2026release'
         }
         debug {
             storeFile file('debug.keystore')
@@ -118,12 +113,12 @@ android {
     }
     buildTypes {
         debug {
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds
