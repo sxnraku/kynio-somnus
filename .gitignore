@@ -16,3 +16,8 @@ web-build/
 # Local env files
 .env*.local
 .env
+
+# Release signing - nao expor ao publico
+android/keystore.properties
+android/app/*.keystore
+android/app/*.jks
